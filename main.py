@@ -10,13 +10,32 @@ from dotenv import load_dotenv
 from modules.auth.google_oauth import verify_google_token
 from modules.crawler.news_crawler import UnifiedNewsCrawler
 from modules.processing.advanced_dedupe import deduplicate_articles
-from modules.processing.sentiment import analyze_sentiment
-from modules.processing.esg_categorize import categorize_esg
-from modules.analysis.risk_scoring import calculate_risk_score
-from modules.analysis.report_generator import generate_esg_report
+# from modules.processing.sentiment import analyze_sentiment
+# from modules.processing.esg_categorize import categorize_esg
+# from modules.analysis.risk_scoring import calculate_risk_score
+# from modules.analysis.report_generator import generate_esg_report
 
 # 환경변수 로드
 load_dotenv()
+
+def calculate_period(period):
+    """주어진 기간 문자열을 기준으로 시작일과 종료일 계산"""
+    end_date = datetime.today()
+    if period == '1d':
+        start_date = end_date - timedelta(days=1)
+    elif period == '1w':
+        start_date = end_date - timedelta(weeks=1)
+    elif period == '1m':
+        start_date = end_date - timedelta(days=30)
+    elif period == '3m':
+        start_date = end_date - timedelta(days=90)
+    elif period == '1y':
+        start_date = end_date - timedelta(days=365)
+    elif period == '3y':
+        start_date = end_date - timedelta(days=3*365)
+    else:
+        raise ValueError("지원하지 않는 기간 형식입니다.")
+    return start_date, end_date
 
 def main():
     """사용자 시나리오 기반 메인 실행 흐름"""
@@ -34,54 +53,60 @@ def main():
 
     # 1단계: 기업 검색 조건 생성
     company = input("\n🔍 분석할 기업명 입력 (예: OCI 홀딩스): ").strip()
-    
+
     # 기본 검색 조건
     search_params = {
         'base_keyword': company,
-        'period': '3m',  # 기본 3개월
+        'period': '1d',  # 기본 1개개월
         'reject_words': [],
         'esg_standard': 'ecovadis'
     }
+
+    # 기간 계산
+    start_date, end_date = calculate_period(search_params['period'])
+    search_params['start_date'] = start_date.strftime("%Y-%m-%d")
+    search_params['end_date'] = end_date.strftime("%Y-%m-%d")
+
     
-    # 1-1단계: 세부 검색 조건 적용
-    advanced_search = input("\n세부 검색을 사용하시겠습니까? (y/n): ").lower()
-    if advanced_search == 'y':
-        search_params.update(get_advanced_search_params())
+    # # 1-1단계: 세부 검색 조건 적용
+    # advanced_search = input("\n세부 검색을 사용하시겠습니까? (y/n): ").lower()
+    # if advanced_search == 'y':
+    #     search_params.update(get_advanced_search_params())
 
     # 2단계: 크롤링 실행
     print(f"\n📰 {company} 관련 뉴스 수집 시작...")
     crawler = UnifiedNewsCrawler()
-    raw_articles = crawler.crawl(search_params)
+    raw_articles = crawler.fetch(search_params)
     print(f"- 수집된 원본 기사: {len(raw_articles)}건")
 
-    # 3단계: 중복 제거
-    print("\n🧹 중복 기사 제거 진행...")
-    unique_articles = deduplicate_articles(raw_articles)
+    # # 3단계: 중복 제거
+    # print("\n🧹 중복 기사 제거 진행...")
+    # unique_articles = deduplicate_articles(raw_articles)
     
-    # 4단계: 감성 분석
-    print("\n🧠 감성 분석 수행 중...")
-    for article in unique_articles:
-        article['sentiment'] = analyze_sentiment(article['content'])
+    # # 4단계: 감성 분석
+    # print("\n🧠 감성 분석 수행 중...")
+    # for article in unique_articles:
+    #     article['sentiment'] = analyze_sentiment(article['content'])
     
-    # 5단계: ESG 카테고리 분류
-    print("\n🏷️ ESG 카테고리 태깅 중...")
-    for article in unique_articles:
-        article['esg_category'] = categorize_esg(article['content'])
+    # # 5단계: ESG 카테고리 분류
+    # print("\n🏷️ ESG 카테고리 태깅 중...")
+    # for article in unique_articles:
+    #     article['esg_category'] = categorize_esg(article['content'])
     
-    # 6단계: 리스크 점수 계산
-    print("\�⚠️ 리스크 평가 진행...")
-    for article in unique_articles:
-        article['risk_score'] = calculate_risk_score(article)
+    # # 6단계: 리스크 점수 계산
+    # print("\�⚠️ 리스크 평가 진행...")
+    # for article in unique_articles:
+    #     article['risk_score'] = calculate_risk_score(article)
     
-    # 최종 리포트 생성
-    print("\n📊 종합 리포트 생성 중...")
-    report = generate_esg_report(unique_articles, search_params)
+    # # 최종 리포트 생성
+    # print("\n📊 종합 리포트 생성 중...")
+    # report = generate_esg_report(unique_articles, search_params)
     
-    # 결과 출력
-    print("\n" + "="*50)
-    print(f"{company} ESG 분석 리포트".center(50))
-    print("="*50)
-    print_report(report)
+    # # 결과 출력
+    # print("\n" + "="*50)
+    # print(f"{company} ESG 분석 리포트".center(50))
+    # print("="*50)
+    # print_report(report)
 
 def get_advanced_search_params():
     """세부 검색 파라미터 입력 UI"""
