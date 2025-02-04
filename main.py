@@ -21,16 +21,16 @@ load_dotenv()
 def main():
     """사용자 시나리오 기반 메인 실행 흐름"""
     
-    # 0단계: 사용자 인증
-    try:
-        user_token = input("Google 로그인 토큰 입력: ")
-        user_info = verify_google_token(user_token)
-        if not user_info:
-            raise ValueError("잘못된 인증 토큰")
-        print(f"\n✅ {user_info['email']}님 환영합니다")
-    except Exception as e:
-        print(f"❌ 로그인 실패: {str(e)}")
-        return
+    # # 0단계: 사용자 인증
+    # try:
+    #     user_token = input("Google 로그인 토큰 입력: ")
+    #     user_info = verify_google_token(user_token)
+    #     if not user_info:
+    #         raise ValueError("잘못된 인증 토큰")
+    #     print(f"\n✅ {user_info['email']}님 환영합니다")
+    # except Exception as e:
+    #     print(f"❌ 로그인 실패: {str(e)}")
+    #     return
 
     # 1단계: 기업 검색 조건 생성
     company = input("\n🔍 분석할 기업명 입력 (예: OCI 홀딩스): ").strip()
