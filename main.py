@@ -9,7 +9,7 @@ from dotenv import load_dotenv
 # 모듈 임포트
 from modules.auth.google_oauth import verify_google_token
 from modules.crawler.news_crawler import UnifiedNewsCrawler
-from modules.processing.advanced_dedupe import deduplicate_articles
+# from modules.processing.advanced_dedupe import deduplicate_articles
 # from modules.processing.sentiment import analyze_sentiment
 # from modules.processing.esg_categorize import categorize_esg
 # from modules.analysis.risk_scoring import calculate_risk_score
